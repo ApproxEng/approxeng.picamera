@@ -3,7 +3,7 @@ import cv2
 
 
 def find_lines(image, threshold=100, scan_region_height=50, scan_region_position=0, scan_region_width_pad=0,
-               min_detection_area=100, invert=False):
+               min_detection_area=100, invert=False, blur_kernel_size=21):
     """
     Scan a numpy image to find things that look like dark lines on a pale background. Return a sorted sequence of
     locations of line centroids, where (when not inverted) -1.0 corresponds to the left edge of the image, 0 to the 
@@ -25,6 +25,8 @@ def find_lines(image, threshold=100, scan_region_height=50, scan_region_position
     :param invert: 
         Boolean - set this to true if your pi camera is upside-down and you therefore want to have -1.0 at the right 
         hand edge of the image rather than the left
+    :param blur_kernel_size:
+        Size of the kernel used when applying the gaussian blur. Defaults to 21, 9 is less computationally intensive.
     :return: 
         A sequence of float values ranging from -1.0 to 1.0, in ascending order, corresponding to the x coordinate of
         the centroids of any line regions detected
@@ -39,7 +41,7 @@ def find_lines(image, threshold=100, scan_region_height=50, scan_region_position
         cv2.COLOR_BGR2GRAY)
     # Apply a gaussian blur to deal with any noise, this cleans up grain from the camera and removes any tiny
     # features we don't care about
-    region = cv2.GaussianBlur(region, (21, 21), 0)
+    region = cv2.GaussianBlur(region, (blur_kernel_size, blur_kernel_size), 0)
     # Threshold the image, converting it into black and white. Because we previously blurred it this should result
     # in a reasonably clean set of features
     th, region = cv2.threshold(region, threshold, 255, cv2.THRESH_BINARY_INV)
